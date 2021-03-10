@@ -1,0 +1,11 @@
+{
+  "name": "jira-release-reporter",
+  "version": "1.0.0",
+  "description": "Scans Jira and provides insights as per provided configuration for particular releases.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "konstantinos perperidis",
+  "license": "ISC"
+}
