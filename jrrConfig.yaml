@@ -1,0 +1,9 @@
+jira:
+  jiraBaseURL: http://localhost:8890/rest
+  jiraUser: admin
+  jiraPass: admin
+project: PROJ1
+releaseVersion: 2.32.0
+issues:
+  - type: Test
+    status: Done
