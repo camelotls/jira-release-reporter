@@ -1,3 +1,5 @@
+const _ = require("lodash");
+
 const basicHeaders = () => {
   return {
     "Content-Type": "application/json",
@@ -20,7 +22,7 @@ const login = async (axiosInstance, jiraUser, jiraPass) => {
     session = `${response.data.session.name}=${response.data.session.value}`;
     console.debug("log-in to jira successful");
   } catch (error) {
-    const errorMessage = `Error while trying to log-in to Jira ${error}`;
+    const errorMessage = constructVerboseErrorMessage(error);
     console.error(errorMessage);
     throw errorMessage;
   }
@@ -39,7 +41,7 @@ const logout = async (axiosInstance, jiraAuthHeaders) => {
     });
     console.debug("log-out from jira successful");
   } catch (error) {
-    const errorMessage = `Error while trying to log-out from Jira ${error}`;
+    const errorMessage = constructVerboseErrorMessage(error);
     console.error(errorMessage);
     throw errorMessage;
   }
@@ -66,7 +68,7 @@ const fetchIssueLinksFromStoriesByRelease = async (
     const response = await searchWithQuery(axiosInstance, query, headers);
     result = response.data;
   } catch (error) {
-    const errorMessage = `Error while trying to fetch stories ${error}`;
+    const errorMessage = constructVerboseErrorMessage(error);
     console.error(errorMessage);
     throw errorMessage;
   }
@@ -93,11 +95,20 @@ const filterByCriteriaAndKeys = async (
     const response = await searchWithQuery(axiosInstance, query, headers);
     result = response.data;
   } catch (error) {
-    const errorMessage = `Error while trying to fetch tests ${error}`;
+    const errorMessage = constructVerboseErrorMessage(error);
     console.error(errorMessage);
     throw errorMessage;
   }
   return result;
+};
+
+const constructVerboseErrorMessage = (error) => {
+  let errorMessage = error.message;
+  return (
+    errorMessage +
+    ": " +
+    _.reduce(error.response.data.errorMessages, (i, j) => `${i};${j}`)
+  );
 };
 
 const stringifyJqlCriteria = (criteria) => {

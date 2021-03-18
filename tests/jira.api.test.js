@@ -42,9 +42,7 @@ describe("Jira API", () => {
     it("should throw an error in case of a failed login due to wrong credentials", async () => {
       await expect(
         login(myMockedAxiosInstance, ...Object.values(getWrongCreds()))
-      ).rejects.toEqual(
-        "Error while trying to log-in to Jira Error: Request failed with status code 401"
-      );
+      ).rejects.toEqual("Request failed with status code 401: Login failed");
     });
   });
 
@@ -78,7 +76,7 @@ describe("Jira API", () => {
           jiraMocker.responses.logoutFailedNotLoggedIn.headers.badheaders
         )
       ).rejects.toEqual(
-        "Error while trying to log-out from Jira Error: Request failed with status code 401"
+        "Request failed with status code 401: You are not authenticated. Authentication required to perform this operation."
       );
     });
   });
@@ -113,7 +111,7 @@ describe("Jira API", () => {
           "Release ABC"
         )
       ).rejects.toEqual(
-        "Error while trying to fetch stories Error: Request failed with status code 400"
+        "Request failed with status code 400: The value 'Release ABC' does not exist for the field 'fixVersion'."
       );
     });
   });
@@ -147,7 +145,7 @@ describe("Jira API", () => {
           { "Automation Type": "wrong", "Test Type": "parameter" }
         )
       ).rejects.toEqual(
-        "Error while trying to fetch tests Error: Request failed with status code 400"
+        "Request failed with status code 400: The option 'wrong' for field 'Automation Candidate' does not exist.;The option 'parameter' for field 'Test Type' does not exist."
       );
     });
   });
