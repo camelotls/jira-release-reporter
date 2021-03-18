@@ -46,7 +46,7 @@ const logout = async (axiosInstance, jiraAuthHeaders) => {
   return result;
 };
 
-const fetchStoriesByRelease = async (
+const fetchIssueLinksFromStoriesByRelease = async (
   axiosInstance,
   jiraAuthHeaders,
   releaseVersion,
@@ -73,6 +73,48 @@ const fetchStoriesByRelease = async (
   return result;
 };
 
+const filterByCriteriaAndKeys = async (
+  axiosInstance,
+  jiraAuthHeaders,
+  keys,
+  criteria
+) => {
+  const headers = {
+    ...jiraAuthHeaders,
+    ...basicHeaders(),
+  };
+  const query = {
+    jql: `${stringifyJqlCriteria(criteria)} AND key in (${keys.join(",")})`,
+    startAt: 0,
+    fields: ["key"],
+  };
+  let result;
+  try {
+    const response = await searchWithQuery(axiosInstance, query, headers);
+    result = response.data;
+  } catch (error) {
+    const errorMessage = `Error while trying to fetch tests ${error}`;
+    console.error(errorMessage);
+    throw errorMessage;
+  }
+  return result;
+};
+
+const stringifyJqlCriteria = (criteria) => {
+  let anArray = [];
+  for (c of Object.entries(criteria)) {
+    anArray.push(`\"${c[0]}\" = \"${c[1]}\"`);
+  }
+  let stringifiedCriteria = "";
+  for (let index = 0; index < anArray.length; index++) {
+    stringifiedCriteria += anArray[index];
+    if (index < anArray.length - 1) {
+      stringifiedCriteria += " AND ";
+    }
+  }
+  return stringifiedCriteria;
+};
+
 const searchWithQuery = async (axiosInstance, query, headers) => {
   return await axiosInstance.post("/api/2/search", query, {
     headers: headers,
@@ -83,5 +125,6 @@ module.exports = {
   login,
   logout,
   getAuthHeader,
-  fetchStoriesByRelease,
+  fetchIssueLinksFromStoriesByRelease,
+  filterByCriteriaAndKeys,
 };

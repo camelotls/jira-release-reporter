@@ -1,14 +1,21 @@
 const {
   fetchStoriesByRelease,
+  fetchIssueLinksFromStoriesByRelease,
   login,
   logout,
+  filterByCriteriaAndKeys,
 } = require("../api/jiraApiClient");
 const jiraMocker = require("./mock/jira");
 const axios = require("../config/axios-config");
 const fetchStoriesByReleaseData = require("./mock/jiraDataResponses/jiraFetchStoriesByRelease");
 const fetchStoriesBadRequest = require("./mock/jiraDataResponses/jiraBadRequestFetchStoriesByRelease");
+const fetchDataBadRequestWrongParameter = require("./mock/jiraDataResponses/jiraBadRequestWrongParameter");
+const fetchAutomatedTests = require("./mock/jiraDataResponses/jiraFetchAutomatedTests");
 const nock = require("nock");
 const _ = require("lodash");
+const rewire = require("rewire");
+const jiraApiClient = rewire("../api/jiraApiClient");
+const stringifyJqlCriteria = jiraApiClient.__get__("stringifyJqlCriteria");
 
 describe("Jira API", () => {
   describe("Login to JIRA", () => {
@@ -81,16 +88,16 @@ describe("Jira API", () => {
       myMockedAxiosInstance = axios(jiraMocker.url).get();
 
       nock(jiraMocker.url)
-        .post("/api/2/search", /Release XYZ/g)
+        .post(jiraMocker.endpoints.search, /Release XYZ/g)
         .reply(200, fetchStoriesByReleaseData);
 
       nock(jiraMocker.url)
-        .post("/api/2/search", /Release ABC/g)
+        .post(jiraMocker.endpoints.search, /Release ABC/g)
         .reply(400, fetchStoriesBadRequest);
     });
 
     it("should return a successful response with data available", async () => {
-      const result = await fetchStoriesByRelease(
+      const result = await fetchIssueLinksFromStoriesByRelease(
         myMockedAxiosInstance,
         jiraMocker.responses.successfulDataRequestTemplate.headers.reqheaders,
         "Release XYZ"
@@ -100,13 +107,60 @@ describe("Jira API", () => {
 
     it("should cause an error when the passed Release isn't known", async () => {
       await expect(
-        fetchStoriesByRelease(
+        fetchIssueLinksFromStoriesByRelease(
           myMockedAxiosInstance,
           jiraMocker.responses.successfulDataRequestTemplate.headers.reqheaders,
           "Release ABC"
         )
       ).rejects.toEqual(
         "Error while trying to fetch stories Error: Request failed with status code 400"
+      );
+    });
+  });
+  describe("Filtering via Jira API", () => {
+    beforeAll(() => {
+      myMockedAxiosInstance = axios(jiraMocker.url).get();
+      nock(jiraMocker.url)
+        .post(jiraMocker.endpoints.search, /DIG-5555/g)
+        .reply(400, fetchDataBadRequestWrongParameter);
+      nock(jiraMocker.url)
+        .post(jiraMocker.endpoints.search, /Automation Type/g)
+        .reply(200, fetchAutomatedTests);
+    });
+    it("should return results without any error in the expected format", async () => {
+      const result = await filterByCriteriaAndKeys(
+        myMockedAxiosInstance,
+        jiraMocker.responses.successfulDataRequestTemplate.headers.reqheaders,
+        ["DIG-28452", "DIG-28454", "DIG-28455", "DIG-28456", "DIG-28318"],
+        { "Automation Type": "yes", "Test Type": "Automation" }
+      );
+      expect(result).not.toBeNull();
+      expect(result.issues.length).toBeGreaterThan(0);
+    });
+
+    it("it should cause an error when a parameter value is not known to Jira", async () => {
+      await expect(
+        filterByCriteriaAndKeys(
+          myMockedAxiosInstance,
+          jiraMocker.responses.successfulDataRequestTemplate.headers.reqheaders,
+          ["DIG-5555", "DIG-28454", "DIG-28455", "DIG-28456", "DIG-28318"],
+          { "Automation Type": "wrong", "Test Type": "parameter" }
+        )
+      ).rejects.toEqual(
+        "Error while trying to fetch tests Error: Request failed with status code 400"
+      );
+    });
+  });
+
+  describe("Transform JS-Object with Criteria into stringified JQL Criteria", () => {
+    it("should concatenate key-value pairs from a JS-Object to a JQL with all Criteria combined with AND", () => {
+      const criteria = {
+        "Automation Type": "yes",
+        "Test Type": "Automated",
+      };
+      const jql = stringifyJqlCriteria(criteria);
+      expect(jql).toEqual(
+        '"Automation Type" = "yes" AND "Test Type" = "Automated"'
       );
     });
   });

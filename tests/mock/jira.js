@@ -11,6 +11,7 @@ const JIRA_MOCK = {
   endpoints: {
     login: "/auth/1/session",
     logout: "/auth/1/session",
+    search: "/api/2/search",
   },
   responses: {
     loginSuccessful: {

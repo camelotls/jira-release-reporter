@@ -1,7 +1,13 @@
 const _ = require("lodash");
 
 const reducer = (issues, type, status) => {
-  return filterByTypeAndStatus(issues, type, status);
+  return takeKeys(filterByTypeAndStatus(issues, type, status));
+};
+
+const takeKeys = (fromArray) => {
+  return _.map(fromArray, (item) => {
+    return item.key;
+  });
 };
 
 const filterByTypeAndStatus = (issues, type, status) => {
