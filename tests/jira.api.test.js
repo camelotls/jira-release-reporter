@@ -4,6 +4,7 @@ const {
   login,
   logout,
   filterByCriteriaAndKeys,
+  getAuthHeader,
 } = require("../api/jiraApiClient");
 const jiraMocker = require("./mock/jira");
 const axios = require("../config/axios-config");
@@ -29,6 +30,13 @@ describe("Jira API", () => {
         .post(jiraMocker.endpoints.login, getWrongCreds())
         .reply(401, jiraMocker.responses.loginFailedWrongCredentials.data);
     });
+    it("should be correctly construct the authentication header", () => {
+      const session = "JSESSIONID=0123456789ABCDEF";
+      const result = getAuthHeader(session);
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty("Cookie", session);
+    });
+
     it("should return a session identifier after sucessful login", async () => {
       const result = await login(
         myMockedAxiosInstance,

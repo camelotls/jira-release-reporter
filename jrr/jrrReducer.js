@@ -30,4 +30,4 @@ const filterOutwardIssues = (issues) => {
   });
 };
 
-module.exports = reducer;
+module.exports = { reducer, takeKeys };

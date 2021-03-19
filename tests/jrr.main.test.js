@@ -3,7 +3,10 @@ const issuesFromJiraAPI = require("./mock/jiraDataResponses/jiraFetchStoriesByRe
   .issues;
 const jrrMain = rewire("../jrr/jrrMain");
 const takeOutwardIssues = jrrMain.__get__("takeOutwardIssues");
+const filterOutwardIssues = jrrMain.__get__("filterOutwardIssues");
 const _ = require("lodash");
+let { filterByCriteriaAndKeys } = require("../api/jiraApiClient");
+const fetchAutomatedTests = require("./mock/jiraDataResponses/jiraFetchAutomatedTests");
 
 describe("JIRA Release Reporter Main function", () => {
   describe("When having several types of issues", () => {
@@ -41,6 +44,44 @@ describe("JIRA Release Reporter Main function", () => {
       expect(tests.issues).toHaveLength(12);
 
       expect(tests.criteria).toEqual(jrrConfigIssues[1].criteria);
+    });
+  });
+
+  describe("When filtering out the outward issues by applying the configured criteria", () => {
+    it("should return the filtered values without any errors", () => {
+      filterByCriteriaAndKeys = jest.fn().mockReturnValue(fetchAutomatedTests);
+
+      const jrrConfigIssues = [
+        {
+          type: "Story",
+          status: "Done",
+        },
+        {
+          type: "Test",
+          status: "Done",
+          criteria: {
+            "Automation Type": "yes",
+            "Test Type": "Automated",
+          },
+        },
+      ];
+      const outwardIssues = takeOutwardIssues(
+        jrrConfigIssues,
+        issuesFromJiraAPI
+      );
+      expect(outwardIssues).not.toBeNull();
+      expect(outwardIssues).toHaveLength(2);
+
+      const filteredOutwardIssues = filterOutwardIssues(outwardIssues, {});
+      expect(filteredOutwardIssues).not.toBeNull();
+      _.each(filterOutwardIssues, (item) => {
+        expect(item).toHaveProperty("issues");
+      });
+      expect(
+        _.some(filteredOutwardIssues, (some) => {
+          return !_.isNull(some) && !_.isEmpty(some);
+        })
+      ).toBeTruthy();
     });
   });
 });
