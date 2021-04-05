@@ -2,7 +2,8 @@ name: Execute Jest Test Suite
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   test:
@@ -10,14 +11,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Read node version from .nvmrc
-        run: nvmrc=$(cat .nvmrc)
+      - id: nvmrc
+        uses: browniebroke/read-nvmrc-action@v1
       - name: Setup Node
         uses: actions/setup-node@v1
         with: 
-          node-version: ${nvmrc}
+          node-version: '${{ steps.nvmrc.outputs.node_version }}'
       - run: npm install
       - name: Run Jest Suite
         uses: mattallty/jest-github-action@v1
         env:
-          GITHUB_TOKEN: ${{secrets.MACHINEUSER_GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.MACHINEUSER_GITHUB_TOKEN }}
