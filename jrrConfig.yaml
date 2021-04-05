@@ -7,6 +7,7 @@ releaseVersion: 2.32.0
 issues:
   - type: Test
     status: Done
+    title: "Automated Tests"
     criteria:
       Automation Candidate: "yes"
       Test Type: Automated

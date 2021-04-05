@@ -4,8 +4,8 @@ const reducer = (issues, type, status) => {
   return takeKeys(filterByTypeAndStatus(issues, type, status));
 };
 
-const takeKeys = (fromArray) => {
-  return _.map(fromArray, (item) => {
+const takeKeys = (from) => {
+  return _.map(from, (item) => {
     return item.key;
   });
 };

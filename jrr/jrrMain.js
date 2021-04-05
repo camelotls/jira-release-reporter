@@ -1,6 +1,6 @@
 const _ = require("lodash");
 const axios = require("../config/axios-config.js");
-const {
+let {
   login,
   logout,
   getAuthHeader,
@@ -8,6 +8,7 @@ const {
   filterByCriteriaAndKeys,
 } = require("../api/jiraApiClient.js");
 const { reducer, takeKeys } = require("./jrrReducer");
+const table = require("console.table");
 
 const jrrMain = async (jrrConfig) => {
   const axiosInstance = axios(jrrConfig.jira.jiraBaseURL).get();
@@ -29,14 +30,22 @@ const jrrMain = async (jrrConfig) => {
   );
 
   const outwardIssues = takeOutwardIssues(jiraConfig.issues, result.issues);
+  const filteredOutwardIssues = filterOutwardIssues(outwardIssues, authHeaders);
+  const shrinkedData = shrinkToCountPerTitle(filteredOutwardIssues);
 
-  // * issue another query with parameters Automation Candidate = Yes AND Test Type = Automated to find the automated ones also get the field Automation Test Type.
-  // * issue another query with the same parameters as above but with additionally Test Type = Automated, Manual to get the partially automated ones.
+  console.log(shrinkedData);
+  console.log(printResultsInTable(shrinkedData));
 
   logout(axiosInstance, authHeaders);
+
+  console.debug(JSON.stringify(filteredOutwardIssues, null, 2));
 };
 
-const filterOutwardIssues = (outwardIssues, authHeaders) => {
+const printResultsInTable = (shrinkedData) => {
+  return table.getTable(shrinkedData);
+};
+
+const filterOutwardIssues = async (outwardIssues, authHeaders) => {
   const outwardIssuesWithCriteria = [...outwardIssues];
   const outwardIssuesWithoutCriteria = _.remove(
     outwardIssuesWithCriteria,
@@ -45,31 +54,48 @@ const filterOutwardIssues = (outwardIssues, authHeaders) => {
     }
   );
 
-  const filteredOutwardIssues = _.map(
-    outwardIssuesWithCriteria,
-    async ({ type, status, issues, criteria }) => {
-      return {
-        type: type,
-        status: status,
-        criteria: criteria,
-        issues: takeKeys(
-          await filterByCriteriaAndKeys(axios, authHeaders, issues, criteria)
-        ),
-      };
-    }
+  const filteredOutwardIssues = await Promise.all(
+    _.map(
+      outwardIssuesWithCriteria,
+      async ({ type, status, issues, criteria, title, issuesCount }) => {
+        return {
+          type: type,
+          status: status,
+          title: title,
+          criteria: criteria,
+          issuesCount: issuesCount,
+          issues: takeKeys(
+            await filterByCriteriaAndKeys(axios, authHeaders, issues, criteria)
+              .issues
+          ),
+        };
+      }
+    )
   );
-  return [...outwardIssuesWithoutCriteria, ...outwardIssuesWithCriteria];
+  return [...outwardIssuesWithoutCriteria, ...filteredOutwardIssues];
+};
+
+const shrinkToCountPerTitle = (theData) => {
+  return _.map(theData, (theItem) => {
+    return {
+      Type: theItem.title,
+      Amount: theItem.issuesCount,
+    };
+  });
 };
 
 const takeOutwardIssues = (jrrConfigIssues, issuesFromJiraAPI) => {
   return (outwardIssues = _.map(
     jrrConfigIssues,
-    ({ type, status, criteria }) => {
+    ({ type, status, criteria, title }) => {
+      const issues = reducer(issuesFromJiraAPI, type, status);
       return {
         type: type,
         status: status,
+        title: title,
         criteria: criteria,
-        issues: reducer(issuesFromJiraAPI, type, status),
+        issues: issues,
+        issuesCount: issues.length,
       };
     }
   ));
