@@ -29,8 +29,12 @@ const jrrMain = async (jrrConfig) => {
     jrrConfig.project
   );
 
-  const outwardIssues = takeOutwardIssues(jiraConfig.issues, result.issues);
-  const filteredOutwardIssues = filterOutwardIssues(outwardIssues, authHeaders);
+  const outwardIssues = takeOutwardIssues(jrrConfig.issues, result.issues);
+  const filteredOutwardIssues = await filterOutwardIssues(
+    axiosInstance,
+    outwardIssues,
+    authHeaders
+  );
   const shrinkedData = shrinkToCountPerTitle(filteredOutwardIssues);
 
   console.log(shrinkedData);
@@ -45,7 +49,11 @@ const printResultsInTable = (shrinkedData) => {
   return table.getTable(shrinkedData);
 };
 
-const filterOutwardIssues = async (outwardIssues, authHeaders) => {
+const filterOutwardIssues = async (
+  axiosInstance,
+  outwardIssues,
+  authHeaders
+) => {
   const outwardIssuesWithCriteria = [...outwardIssues];
   const outwardIssuesWithoutCriteria = _.remove(
     outwardIssuesWithCriteria,
@@ -65,8 +73,12 @@ const filterOutwardIssues = async (outwardIssues, authHeaders) => {
           criteria: criteria,
           issuesCount: issuesCount,
           issues: takeKeys(
-            await filterByCriteriaAndKeys(axios, authHeaders, issues, criteria)
-              .issues
+            await filterByCriteriaAndKeys(
+              axiosInstance,
+              authHeaders,
+              issues,
+              criteria
+            ).issues
           ),
         };
       }

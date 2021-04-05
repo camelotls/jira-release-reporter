@@ -59,7 +59,7 @@ const fetchIssueLinksFromStoriesByRelease = async (
     ...basicHeaders(),
   };
   const query = {
-    jql: `project = ${project} AND issuetype = Story AND fixVersion = ${releaseVersion}`,
+    jql: `project = ${project} AND issuetype = Story AND fixVersion = "${releaseVersion}"`,
     startAt: 0,
     fields: ["issuelinks"],
   };
