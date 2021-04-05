@@ -19,6 +19,4 @@ jobs:
           node-version: '${{ steps.nvmrc.outputs.node_version }}'
       - run: npm install
       - name: Run Jest Suite
-        uses: mattallty/jest-github-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.MACHINEUSER_GITHUB_TOKEN }}
+      - run: npm test
