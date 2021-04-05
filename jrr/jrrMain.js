@@ -37,12 +37,12 @@ const jrrMain = async (jrrConfig) => {
   );
   const shrinkedData = shrinkToCountPerTitle(filteredOutwardIssues);
 
-  console.log(shrinkedData);
+  console.debug(shrinkedData);
   console.log(printResultsInTable(shrinkedData));
 
   logout(axiosInstance, authHeaders);
 
-  console.debug(JSON.stringify(filteredOutwardIssues, null, 2));
+  // console.debug(JSON.stringify(filteredOutwardIssues, null, 2));
 };
 
 const printResultsInTable = (shrinkedData) => {
@@ -66,20 +66,19 @@ const filterOutwardIssues = async (
     _.map(
       outwardIssuesWithCriteria,
       async ({ type, status, issues, criteria, title, issuesCount }) => {
+        const filteredByCriteriaAndKeys = await filterByCriteriaAndKeys(
+          axiosInstance,
+          authHeaders,
+          issues,
+          criteria
+        );
         return {
           type: type,
           status: status,
           title: title,
           criteria: criteria,
           issuesCount: issuesCount,
-          issues: takeKeys(
-            await filterByCriteriaAndKeys(
-              axiosInstance,
-              authHeaders,
-              issues,
-              criteria
-            ).issues
-          ),
+          issues: takeKeys(filteredByCriteriaAndKeys.issues),
         };
       }
     )

@@ -79,6 +79,7 @@ describe("JIRA Release Reporter Main function", () => {
       expect(outwardIssues).toHaveLength(2);
 
       const filteredOutwardIssues = await filterOutwardIssues(
+        _,
         outwardIssues,
         {}
       );
@@ -125,6 +126,7 @@ describe("JIRA Release Reporter Main function", () => {
       expect(outwardIssues).toHaveLength(2);
 
       const filteredOutwardIssues = await filterOutwardIssues(
+        _,
         outwardIssues,
         {}
       );
@@ -167,6 +169,7 @@ describe("JIRA Release Reporter Main function", () => {
       expect(outwardIssues).toHaveLength(2);
 
       const filteredOutwardIssues = await filterOutwardIssues(
+        _,
         outwardIssues,
         {}
       );
