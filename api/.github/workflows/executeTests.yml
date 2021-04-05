@@ -1,0 +1,23 @@
+name: Execute Jest Test Suite
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Read node version from .nvmrc
+        run: nvmrc=$(cat .nvmrc)
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with: 
+          node-version: ${nvmrc}
+      - run: npm install
+      - name: Run Jest Suite
+        uses: mattallty/jest-github-action@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.MACHINEUSER_GITHUB_TOKEN}}
