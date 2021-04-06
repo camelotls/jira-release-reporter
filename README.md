@@ -4,7 +4,7 @@
 This piece of software makes use of the [Jira Server REST API v8.4.3](https://docs.atlassian.com/software/jira/docs/api/REST/8.4.3/) in order to retrieve statistical information about issues and their status within a particular release. The desired information can be formulated in a declarative way in the _jrrConfig.yaml_ file which is picked up at runtime and translated into [JQL](https://www.atlassian.com/blog/jira-software/jql-the-most-flexible-way-to-search-jira-14) which then is executed on the configured JIRA instance (_also jrrConfig.yaml_) via the REST API.
 
 ### Configuration
-The repo contains a file called _jrrConfig.template.yaml_ which servers as a template to copy-rename into the (_expected_) filename _jrrConfig.yaml_). This is done since access credentials for JIRA are necessary to be configured and thus to avoid those to be accidentally committed and pushed to origin. The _jrrConfig.yaml_ is excluded via _.gitignore_ so there's no danger of having sensitive information exposed easily by mistake.
+The repo contains a file called [_jrrConfig.template.yaml_](https://github.com/camelotls/jira-release-reporter/blob/DIG32594/jrrConfig.template.yaml) which servers as a template to copy-rename into the (_expected_) filename _jrrConfig.yaml_). This is done since access credentials for JIRA are necessary to be configured and thus to avoid those to be accidentally committed and pushed to origin. The _jrrConfig.yaml_ is excluded via [_.gitignore_](https://github.com/camelotls/jira-release-reporter/blob/DIG32594/.gitignore) so there's no danger of having sensitive information exposed easily by mistake.
 
 The contents of the configuration file are more or less easy to understand.
 Let's have a looksy

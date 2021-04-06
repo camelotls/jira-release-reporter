@@ -12,10 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: nvmrc
+        name: Get the node version from the available .nvmrc
         uses: browniebroke/read-nvmrc-action@v1
       - name: Setup Node and run Jest Suite
         uses: actions/setup-node@v1
-        with: 
-          node-version: '${{ steps.nvmrc.outputs.node_version }}'
-      - run: npm install
-      - run: npm test
+        with:
+          node-version: "${{ steps.nvmrc.outputs.node_version }}"
+      - run: |
+          npm install
+          npm test

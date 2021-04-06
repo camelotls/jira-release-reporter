@@ -1,4 +1,5 @@
 const _ = require("lodash");
+const { Endpoints } = require("./constants");
 
 const basicHeaders = () => {
   return {
@@ -16,7 +17,7 @@ const login = async (axiosInstance, jiraUser, jiraPass) => {
   const authBody = { username: jiraUser, password: jiraPass };
   let session;
   try {
-    const response = await axiosInstance.post("/auth/1/session", authBody, {
+    const response = await axiosInstance.post(Endpoints.AUTH, authBody, {
       headers: basicHeaders(),
     });
     session = `${response.data.session.name}=${response.data.session.value}`;
@@ -36,7 +37,7 @@ const logout = async (axiosInstance, jiraAuthHeaders) => {
   };
   let result;
   try {
-    result = await axiosInstance.delete("/auth/1/session", {
+    result = await axiosInstance.delete(Endpoints.AUTH, {
       headers: headers,
     });
     console.debug("log-out from jira successful");
@@ -112,14 +113,14 @@ const constructVerboseErrorMessage = (error) => {
 };
 
 const stringifyJqlCriteria = (criteria) => {
-  let anArray = [];
+  let tokenizedCriteria = [];
   for (c of Object.entries(criteria)) {
-    anArray.push(`\"${c[0]}\" = \"${c[1]}\"`);
+    tokenizedCriteria.push(`\"${c[0]}\" = \"${c[1]}\"`);
   }
   let stringifiedCriteria = "";
-  for (let index = 0; index < anArray.length; index++) {
-    stringifiedCriteria += anArray[index];
-    if (index < anArray.length - 1) {
+  for (let index = 0; index < tokenizedCriteria.length; index++) {
+    stringifiedCriteria += tokenizedCriteria[index];
+    if (index < tokenizedCriteria.length - 1) {
       stringifiedCriteria += " AND ";
     }
   }
@@ -127,7 +128,7 @@ const stringifyJqlCriteria = (criteria) => {
 };
 
 const searchWithQuery = async (axiosInstance, query, headers) => {
-  return await axiosInstance.post("/api/2/search", query, {
+  return await axiosInstance.post(Endpoints.SEARCH, query, {
     headers: headers,
   });
 };
