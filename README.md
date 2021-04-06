@@ -48,8 +48,18 @@ Stories          2
 Automated Tests  16 
 ```
 
+You also can pass a different project and release version to the ones available in the config file by passing the appropriate parameters.
+```
+node index.js --project=DIG --release='Release 59'
+```
+
 ### Docker
-You can create an image by simply executing `npm run dist` in the project's root directory. An image with the (_default_) tag `docker.artifactory.camelot.global/jira-release-reporter:0.1.0` will be created. You can afterwards run `docker run` for the created image to run the jira release reporter. The output will be printed on stdout.
+You can create an image by simply executing `npm run dist` in the project's root directory. An image with the (_default_) tag `docker.artifactory.camelot.global/jira-release-reporter:0.1.0` will be created. You can afterwards run `docker run` for the created image to run the jira release reporter. The output will be printed on stdout. Hint: please consider adding the `--rm` flag in order to immediately remove the container after execution.
+In case you'd like to provide the project and the release version as arguments, you can do so by passing them as environment arguments to the `docker run` command.
+```
+docker run -e project=DIG -e release='Release 59' docker.artifactory.camelot.global/jira-release-reporter:0.1.0
+```
+
 
 ## Tests, Tests, Tests
 There's a decent amount of unit tests (and beyond) included. Those can be executed via

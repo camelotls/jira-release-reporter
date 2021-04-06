@@ -1,6 +1,6 @@
 {
   "name": "jira-release-reporter",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Scans Jira and provides insights as per provided configuration for particular releases.",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,8 @@
     "console.table": "^0.10.0",
     "js-yaml": "^4.0.0",
     "json2csv": "^5.0.6",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.28.0",

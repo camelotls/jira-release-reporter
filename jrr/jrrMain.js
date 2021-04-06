@@ -40,7 +40,8 @@ const jrrMain = async (jrrConfig) => {
 
   logout(axiosInstance, authHeaders);
 
-  console.debug(JSON.stringify(filteredIssues, null, 2));
+  // * uncomment for debug purposes
+  // console.debug(JSON.stringify(filteredIssues, null, 2));
 };
 
 const printResultsInTable = (shrinkedData) => table.getTable(shrinkedData);
