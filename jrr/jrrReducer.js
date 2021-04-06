@@ -13,10 +13,13 @@ const takeKeys = (from) => {
 const filterByTypeAndStatus = (issues, type, status) => {
   const issueMetadata = getIssueMetadata(issues);
   return _.filter(issueMetadata, (issue) => {
-    return (
-      _.lowerCase(issue.fields.issuetype.name) === _.lowerCase(type) &&
-      _.lowerCase(issue.fields.status.name) === _.lowerCase(status)
-    );
+    if (status) {
+      return (
+        _.lowerCase(issue.fields.issuetype.name) === _.lowerCase(type) &&
+        _.lowerCase(issue.fields.status.name) === _.lowerCase(status)
+      );
+    }
+    return _.lowerCase(issue.fields.issuetype.name) === _.lowerCase(type)
   });
 };
 
