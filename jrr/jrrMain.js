@@ -1,14 +1,17 @@
-const _ = require("lodash");
-const axios = require("../config/axios-config.js");
+/* eslint-disable no-console */
+/* eslint-disable no-use-before-define */
+/* eslint-disable prefer-const */
+const _ = require('lodash');
+const table = require('console.table');
+const axios = require('../config/axios-config.js');
 let {
   login,
   logout,
   getAuthHeader,
   fetchIssueLinksFromStoriesByRelease,
   filterByCriteriaAndKeys,
-} = require("../api/jiraApiClient.js");
-const { reducer, takeKeys } = require("./jrrReducer");
-const table = require("console.table");
+} = require('../api/jiraApiClient.js');
+const { reducer, takeKeys } = require('./jrrReducer');
 
 const jrrMain = async (jrrConfig) => {
   const axiosInstance = axios(jrrConfig.jira.jiraBaseURL).get();
@@ -16,17 +19,16 @@ const jrrMain = async (jrrConfig) => {
   const sessionId = await login(
     axiosInstance,
     jrrConfig.jira.jiraUser,
-    jrrConfig.jira.jiraPass
+    jrrConfig.jira.jiraPass,
   );
 
-  jrrConfig;
   const authHeaders = getAuthHeader(sessionId);
 
   const result = await fetchIssueLinksFromStoriesByRelease(
     axiosInstance,
     authHeaders,
     jrrConfig.releaseVersion,
-    jrrConfig.project
+    jrrConfig.project,
   );
 
   const issues = takeIssues(jrrConfig.issues, result.issues);
@@ -41,65 +43,60 @@ const jrrMain = async (jrrConfig) => {
   console.debug(JSON.stringify(filteredIssues, null, 2));
 };
 
-const printResultsInTable = (shrinkedData) => {
-  return table.getTable(shrinkedData);
-};
+const printResultsInTable = (shrinkedData) => table.getTable(shrinkedData);
 
 const filterIssues = async (axiosInstance, issuesToFilter, authHeaders) => {
   const issuesWithCriteria = [...issuesToFilter];
-  const issuesWithoutCriteria = _.remove(issuesWithCriteria, (i) => {
-    return !i.criteria;
-  });
+  const issuesWithoutCriteria = _.remove(issuesWithCriteria, (i) => !i.criteria);
 
   const filteredIssues = await Promise.all(
     _.map(
       issuesWithCriteria,
-      async ({ type, status, issues, criteria, title, issuesCount }) => {
+      async ({
+        type, status, issues, criteria, title,
+      }) => {
         const filteredByCriteriaAndKeys = await filterByCriteriaAndKeys(
           axiosInstance,
           authHeaders,
           issues,
-          criteria
+          criteria,
         );
         const issueKeys = takeKeys(filteredByCriteriaAndKeys.issues);
         return {
-          type: type,
-          status: status,
-          title: title,
-          criteria: criteria,
+          type,
+          status,
+          title,
+          criteria,
           issuesCount: issueKeys.length,
           issues: issueKeys,
         };
-      }
-    )
+      },
+    ),
   );
   return [...issuesWithoutCriteria, ...filteredIssues];
 };
 
-const shrinkToCountPerTitle = (theData) => {
-  return _.map(theData, (theItem) => {
-    return {
-      Type: theItem.title,
-      Amount: theItem.issuesCount,
-    };
-  });
-};
+const shrinkToCountPerTitle = (theData) => _.map(theData, (theItem) => ({
+  Type: theItem.title,
+  Amount: theItem.issuesCount,
+}));
 
-const takeIssues = (jrrConfigIssues, issuesFromJiraAPI) => {
-  return (reducedIssues = _.map(
-    jrrConfigIssues,
-    ({ type, status, criteria, title }) => {
-      const issues = reducer(issuesFromJiraAPI, type, status);
-      return {
-        type: type,
-        status: status,
-        title: title,
-        criteria: criteria,
-        issues: issues,
-        issuesCount: issues.length,
-      };
-    }
-  ));
-};
+// eslint-disable-next-line no-return-assign
+const takeIssues = (jrrConfigIssues, issuesFromJiraAPI) => (_.map(
+  jrrConfigIssues,
+  ({
+    type, status, criteria, title,
+  }) => {
+    const issues = reducer(issuesFromJiraAPI, type, status);
+    return {
+      type,
+      status,
+      title,
+      criteria,
+      issues,
+      issuesCount: issues.length,
+    };
+  },
+));
 
 module.exports = jrrMain;
