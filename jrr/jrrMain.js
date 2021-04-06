@@ -72,13 +72,14 @@ const filterOutwardIssues = async (
           issues,
           criteria
         );
+        const issueKeys = takeKeys(filteredByCriteriaAndKeys.issues);
         return {
           type: type,
           status: status,
           title: title,
           criteria: criteria,
-          issuesCount: issuesCount,
-          issues: takeKeys(filteredByCriteriaAndKeys.issues),
+          issuesCount: issueKeys.length,
+          issues: issueKeys,
         };
       }
     )
