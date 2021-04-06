@@ -11,22 +11,25 @@ const takeKeys = (from) => {
 };
 
 const filterByTypeAndStatus = (issues, type, status) => {
-  const outwardIssues = filterOutwardIssues(issues);
-  return _.filter(outwardIssues, (outwardIssue) => {
+  const issueMetadata = getIssueMetadata(issues);
+  return _.filter(issueMetadata, (issue) => {
     return (
-      _.lowerCase(outwardIssue.fields.issuetype.name) === _.lowerCase(type) &&
-      _.lowerCase(outwardIssue.fields.status.name) === _.lowerCase(status)
+      _.lowerCase(issue.fields.issuetype.name) === _.lowerCase(type) &&
+      _.lowerCase(issue.fields.status.name) === _.lowerCase(status)
     );
   });
 };
 
-const filterOutwardIssues = (issues) => {
+const getIssueMetadata = (issues) => {
   return _.flatMap(issues, (issue) => {
     return issue.fields.issuelinks
       .filter((issueLink) => {
-        return issueLink["outwardIssue"] !== undefined;
+        return (
+          issueLink["outwardIssue"] !== undefined ||
+          issueLink["inwardIssue"] !== undefined
+        );
       })
-      .map((issuelink) => issuelink.outwardIssue);
+      .map((issuelink) => issuelink.outwardIssue || issuelink.inwardIssue);
   });
 };
 

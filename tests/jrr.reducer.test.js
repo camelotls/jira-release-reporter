@@ -9,7 +9,7 @@ describe("The Reducer's functions", () => {
   describe("Filter a JIRA response containing issues of type 'story' by selecting the related Test issues with status 'Done'", () => {
     it("should return the expected amount of tests which appear as links to a story", () => {
       const linkedTests = filterByTypeAndStatus(data.issues, "Test", "Done");
-      expect(linkedTests).toHaveLength(12);
+      expect(linkedTests).toHaveLength(17);
       linkedTests.map((linkedTest) => {
         expect(linkedTest.fields).not.toBeNull();
         expect(linkedTest.key).not.toBeNull();
@@ -20,7 +20,7 @@ describe("The Reducer's functions", () => {
 
     it("should return the keys of the filtered issues", () => {
       const keys = reducer(data.issues, "Test", "Done");
-      expect(keys).toHaveLength(12);
+      expect(keys).toHaveLength(17);
       expect(keys).toEqual(
         expect.arrayContaining([
           "DIG-28452",

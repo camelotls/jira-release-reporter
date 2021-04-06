@@ -2,8 +2,8 @@ const rewire = require("rewire");
 const issuesFromJiraAPI = require("./mock/jiraDataResponses/jiraFetchStoriesByRelease")
   .issues;
 const jrrMain = rewire("../jrr/jrrMain");
-const takeOutwardIssues = jrrMain.__get__("takeOutwardIssues");
-const filterOutwardIssues = jrrMain.__get__("filterOutwardIssues");
+const takeIssues = jrrMain.__get__("takeIssues");
+const filterIssues = jrrMain.__get__("filterIssues");
 const shrinkToCountPerTitle = jrrMain.__get__("shrinkToCountPerTitle");
 const printResultsInTable = jrrMain.__get__("printResultsInTable");
 const _ = require("lodash");
@@ -31,23 +31,20 @@ describe("JIRA Release Reporter Main function", () => {
           },
         },
       ];
-      const outwardIssues = takeOutwardIssues(
-        jrrConfigIssues,
-        issuesFromJiraAPI
-      );
-      expect(outwardIssues).not.toBeNull();
-      expect(outwardIssues).toHaveLength(2);
+      const issues = takeIssues(jrrConfigIssues, issuesFromJiraAPI);
+      expect(issues).not.toBeNull();
+      expect(issues).toHaveLength(2);
 
-      const stories = _.filter(outwardIssues, (outwardIssue) => {
-        return outwardIssue.type === "Story";
+      const stories = _.filter(issues, (issue) => {
+        return issue.type === "Story";
       })[0];
 
-      const tests = _.filter(outwardIssues, (outwardIssue) => {
-        return outwardIssue.type === "Test";
+      const tests = _.filter(issues, (issue) => {
+        return issue.type === "Test";
       })[0];
 
       expect(stories.issues).toHaveLength(1);
-      expect(tests.issues).toHaveLength(12);
+      expect(tests.issues).toHaveLength(17);
 
       expect(tests.criteria).toEqual(jrrConfigIssues[1].criteria);
     });
@@ -71,20 +68,13 @@ describe("JIRA Release Reporter Main function", () => {
           },
         },
       ];
-      const outwardIssues = takeOutwardIssues(
-        jrrConfigIssues,
-        issuesFromJiraAPI
-      );
-      expect(outwardIssues).not.toBeNull();
-      expect(outwardIssues).toHaveLength(2);
+      const issues = takeIssues(jrrConfigIssues, issuesFromJiraAPI);
+      expect(issues).not.toBeNull();
+      expect(issues).toHaveLength(2);
 
-      const filteredOutwardIssues = await filterOutwardIssues(
-        _,
-        outwardIssues,
-        {}
-      );
-      expect(filteredOutwardIssues).not.toBeNull();
-      _.each(filterOutwardIssues, (item) => {
+      const filteredissues = await filterIssues(_, issues, {});
+      expect(filteredissues).not.toBeNull();
+      _.each(filterIssues, (item) => {
         expect(item).toHaveProperty("issues");
         expect(item.issues).not.toBeNull();
         expect(item.issues.length).toBeGreaterThan(0);
@@ -93,7 +83,7 @@ describe("JIRA Release Reporter Main function", () => {
         expect(item).toHaveProperty("title");
       });
       expect(
-        _.some(filteredOutwardIssues, (some) => {
+        _.some(filteredissues, (some) => {
           return !_.isNull(some) && !_.isEmpty(some);
         })
       ).toBeTruthy();
@@ -118,19 +108,12 @@ describe("JIRA Release Reporter Main function", () => {
           },
         },
       ];
-      const outwardIssues = takeOutwardIssues(
-        jrrConfigIssues,
-        issuesFromJiraAPI
-      );
-      expect(outwardIssues).not.toBeNull();
-      expect(outwardIssues).toHaveLength(2);
+      const issues = takeIssues(jrrConfigIssues, issuesFromJiraAPI);
+      expect(issues).not.toBeNull();
+      expect(issues).toHaveLength(2);
 
-      const filteredOutwardIssues = await filterOutwardIssues(
-        _,
-        outwardIssues,
-        {}
-      );
-      const shrinkedData = shrinkToCountPerTitle(filteredOutwardIssues);
+      const filteredissues = await filterIssues(_, issues, {});
+      const shrinkedData = shrinkToCountPerTitle(filteredissues);
       expect(shrinkedData).not.toBeNull();
       expect(shrinkedData.length).toEqual(2);
       _.each(shrinkedData, (j) => {
@@ -161,24 +144,17 @@ describe("JIRA Release Reporter Main function", () => {
           },
         },
       ];
-      const outwardIssues = takeOutwardIssues(
-        jrrConfigIssues,
-        issuesFromJiraAPI
-      );
-      expect(outwardIssues).not.toBeNull();
-      expect(outwardIssues).toHaveLength(2);
+      const issues = takeIssues(jrrConfigIssues, issuesFromJiraAPI);
+      expect(issues).not.toBeNull();
+      expect(issues).toHaveLength(2);
 
-      const filteredOutwardIssues = await filterOutwardIssues(
-        _,
-        outwardIssues,
-        {}
-      );
-      const shrinkedData = shrinkToCountPerTitle(filteredOutwardIssues);
+      const filteredissues = await filterIssues(_, issues, {});
+      const shrinkedData = shrinkToCountPerTitle(filteredissues);
       const table = printResultsInTable(shrinkedData);
       console.log(table);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        "Type             Amount\n---------------  ------\nStories          1     \nAutomated Tests  12    \n\n"
+        "Type             Amount\n---------------  ------\nStories          1     \nAutomated Tests  5     \n\n"
       );
     });
   });

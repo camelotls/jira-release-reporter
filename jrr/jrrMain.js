@@ -29,42 +29,31 @@ const jrrMain = async (jrrConfig) => {
     jrrConfig.project
   );
 
-  const outwardIssues = takeOutwardIssues(jrrConfig.issues, result.issues);
-  const filteredOutwardIssues = await filterOutwardIssues(
-    axiosInstance,
-    outwardIssues,
-    authHeaders
-  );
-  const shrinkedData = shrinkToCountPerTitle(filteredOutwardIssues);
+  const issues = takeIssues(jrrConfig.issues, result.issues);
+  const filteredIssues = await filterIssues(axiosInstance, issues, authHeaders);
+  const shrinkedData = shrinkToCountPerTitle(filteredIssues);
 
   console.debug(shrinkedData);
   console.log(printResultsInTable(shrinkedData));
 
   logout(axiosInstance, authHeaders);
 
-  console.debug(JSON.stringify(filteredOutwardIssues, null, 2));
+  console.debug(JSON.stringify(filteredIssues, null, 2));
 };
 
 const printResultsInTable = (shrinkedData) => {
   return table.getTable(shrinkedData);
 };
 
-const filterOutwardIssues = async (
-  axiosInstance,
-  outwardIssues,
-  authHeaders
-) => {
-  const outwardIssuesWithCriteria = [...outwardIssues];
-  const outwardIssuesWithoutCriteria = _.remove(
-    outwardIssuesWithCriteria,
-    (i) => {
-      return !i.criteria;
-    }
-  );
+const filterIssues = async (axiosInstance, issuesToFilter, authHeaders) => {
+  const issuesWithCriteria = [...issuesToFilter];
+  const issuesWithoutCriteria = _.remove(issuesWithCriteria, (i) => {
+    return !i.criteria;
+  });
 
-  const filteredOutwardIssues = await Promise.all(
+  const filteredIssues = await Promise.all(
     _.map(
-      outwardIssuesWithCriteria,
+      issuesWithCriteria,
       async ({ type, status, issues, criteria, title, issuesCount }) => {
         const filteredByCriteriaAndKeys = await filterByCriteriaAndKeys(
           axiosInstance,
@@ -84,7 +73,7 @@ const filterOutwardIssues = async (
       }
     )
   );
-  return [...outwardIssuesWithoutCriteria, ...filteredOutwardIssues];
+  return [...issuesWithoutCriteria, ...filteredIssues];
 };
 
 const shrinkToCountPerTitle = (theData) => {
@@ -96,8 +85,8 @@ const shrinkToCountPerTitle = (theData) => {
   });
 };
 
-const takeOutwardIssues = (jrrConfigIssues, issuesFromJiraAPI) => {
-  return (outwardIssues = _.map(
+const takeIssues = (jrrConfigIssues, issuesFromJiraAPI) => {
+  return (reducedIssues = _.map(
     jrrConfigIssues,
     ({ type, status, criteria, title }) => {
       const issues = reducer(issuesFromJiraAPI, type, status);
