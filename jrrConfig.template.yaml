@@ -1,0 +1,13 @@
+jira:
+  jiraBaseURL: https://your.jira.instance/rest
+  jiraUser: jiraUser
+  jiraPass: jiraPassword
+project: DIG
+releaseVersion: Release 58
+issues:
+  - type: Test
+    status: Done
+    title: "Automated Tests"
+    criteria:
+      Automation Candidate: "yes"
+      Test Type: Automated
