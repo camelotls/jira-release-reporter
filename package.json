@@ -4,7 +4,10 @@
   "description": "Scans Jira and provides insights as per provided configuration for particular releases.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "dist": "./dist.sh",
+    "distWithTag": "./dist.sh -t $npm_config_tag",
+    "distAndPush": "./dist.sh -p",
+    "distTagAndPush": "./dist.sh -t $npm_config_tag -p"
   },
   "author": "konstantinos perperidis",
   "license": "ISC",
