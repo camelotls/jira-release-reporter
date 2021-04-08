@@ -1,10 +1,14 @@
 {
   "name": "jira-release-reporter",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Scans Jira and provides insights as per provided configuration for particular releases.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "dist": "./dist.sh",
+    "distWithTag": "./dist.sh -t $npm_config_tag",
+    "distAndPush": "./dist.sh -p",
+    "distTagAndPush": "./dist.sh -t $npm_config_tag -p"
   },
   "author": "konstantinos perperidis",
   "license": "ISC",
@@ -13,9 +17,11 @@
     "console.table": "^0.10.0",
     "js-yaml": "^4.0.0",
     "json2csv": "^5.0.6",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
+    "@vercel/ncc": "^0.28.0",
     "eslint": "^7.23.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
