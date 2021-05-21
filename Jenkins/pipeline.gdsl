@@ -9,11 +9,12 @@ pipeline {
         string(name: 'Release', description: 'The Release Version as defined in JIRA for the Project')
         string(name: 'jrrVersion', description: 'The JIRA Release Reporter Docker Image version to execute')
         string(name: 'agentName', description: 'The agent to run the pipeline on', defaultValue: 'spark-compile')
+        string(name: 'jiraCredentialsId', description: 'The jira credentials id of the secret in the Jenkins vault')
     }
     stages {
         stage('Execute Release Reporter') {
             steps {
-                withCredentials([usernamePassword(credentialsId: config.jiraCredentialsId, passwordVariable: 'jiraPass', usernameVariable: 'jiraUser')]) {
+                withCredentials([usernamePassword(credentialsId: params.jiraCredentialsId, passwordVariable: 'jiraPass', usernameVariable: 'jiraUser')]) {
                     sh "docker run -e project=${Project} -e release=${Release} -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v `pwd`:/jrr/bin docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
                     publishHtml("./", "out.html", "Jira Release Report for ${Release}")
                 }
