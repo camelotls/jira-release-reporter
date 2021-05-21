@@ -8,25 +8,25 @@ const basicHeaders = () => ({
   'Content-Type': 'application/json',
 });
 
-const getAuthHeader = (session) => ({
-  Cookie: session,
+const getAuthHeader = (cookie) => ({
+  Cookie: `${cookie.jsessionId};${cookie.awslalb}`,
 });
 
 const login = async (axiosInstance, jiraUser, jiraPass) => {
   const authBody = { username: jiraUser, password: jiraPass };
-  let session;
+  let cookie;
   try {
     const response = await axiosInstance.post(Endpoints.AUTH, authBody, {
       headers: basicHeaders(),
     });
-    session = `${response.data.session.name}=${response.data.session.value}`;
+    cookie = { jsessionId: `${response.data.session.name}=${response.data.session.value}`, awslalb: `${response.headers['set-cookie'][0].split(';')[0]}` };
     console.debug('log-in to jira successful');
   } catch (error) {
     const errorMessage = constructVerboseErrorMessage(error);
     console.error(errorMessage);
     throw errorMessage;
   }
-  return session;
+  return cookie;
 };
 
 const logout = async (axiosInstance, jiraAuthHeaders) => {

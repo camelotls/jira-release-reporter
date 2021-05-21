@@ -32,13 +32,24 @@ const options = yargs.usage('Usage: -p <JIRA Project ID> -r <Release Name>').opt
   alias: 'release', describe: 'The release version to retrieve information for', type: 'string', demandOption: false,
 }).argv;
 
-const { project, release } = options;
+const {
+  project, release, jiraUser, jiraPass, format,
+} = options;
 
 if (project) {
   jrrConfig.project = project;
 }
 if (release) {
   jrrConfig.releaseVersion = release;
+}
+if (jiraUser) {
+  jrrConfig.jiraUser = jiraUser;
+}
+if (jiraPass) {
+  jrrConfig.jiraPass = jiraPass;
+}
+if (format) {
+  jrrConfig.format = format;
 }
 
 jrrMain(jrrConfig);

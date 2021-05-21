@@ -1,0 +1,17 @@
+<html>
+    <head></head>
+    <body>
+        <table>
+            <th>
+                <td>Type</td>
+                <td>Amount</td>
+            </th>
+            {{#each this}}
+                <tr>
+                    <td>{{this.Type}}</td>
+                    <td>{{this.Amount}}</td>
+                </tr>
+            {{/each}}
+        </table>
+    </body>
+</html>
