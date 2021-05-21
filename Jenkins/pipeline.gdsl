@@ -8,7 +8,7 @@ pipeline {
         string(name: 'Project', description: 'The Project in JIRA to execute the reporting against')
         string(name: 'Release', description: 'The Release Version as defined in JIRA for the Project')
         string(name: 'jrrVersion', description: 'The JIRA Release Reporter Docker Image version to execute')
-        string(name: 'agentName', description: 'The agent to run the pipeline on', default: 'spark-compile')
+        string(name: 'agentName', description: 'The agent to run the pipeline on', defaultValue: 'spark-compile')
     }
     stages {
         stage('Execute Release Reporter') {
