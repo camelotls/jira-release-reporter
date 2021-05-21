@@ -15,7 +15,7 @@ pipeline {
         stage('Execute Release Reporter') {
             steps {
                 withCredentials([usernamePassword(credentialsId: params.jiraCredentialsId, passwordVariable: 'jiraPass', usernameVariable: 'jiraUser')]) {
-                    sh "docker run -e project=${Project} -e release=${Release} -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v `pwd`:/jrr/bin docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
+                    sh "docker run -e project=${params.Project} -e release=${params.Release} -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v \"`pwd`\":/jrr/bin docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
                     publishHtml("./", "out.html", "Jira Release Report for ${Release}")
                 }
             }
