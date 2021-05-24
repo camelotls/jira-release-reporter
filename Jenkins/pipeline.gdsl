@@ -18,6 +18,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: params.jiraCredentialsId, passwordVariable: 'jiraPass', usernameVariable: 'jiraUser')]) {
                     sh "sudo systemctl is-active --quiet docker || sudo systemctl restart docker"
                     sh "sudo docker run -e jiraBaseURL=\"${params.jiraBaseURL}\" -e project=\"${params.Project}\" -e release=\"${params.Release}\" -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v \"`pwd`\":/jrr/bin docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
+                    sh "ls -la"
                     publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: "./", reportFiles: "out.html", reportName: "Jira Release Report for ${Release}"])
                 }
             }
