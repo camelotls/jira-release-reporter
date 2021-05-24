@@ -8,7 +8,7 @@ if [ ! -f "$CONF" ]; then
 fi
 
 npm install
-./node_modules/.bin/ncc build index.js -o dist
+ncc build index.js -o dist
 
 DIST=./dist/index.js
 if [ ! -f "$DIST" ]; then

@@ -8,7 +8,7 @@ ENV format = ''
 
 WORKDIR /jrr/bin
 
-COPY ./jrrConfig.yaml .
+COPY ./jrrConfig.template.yaml ./jrrConfig.yaml
 COPY ./dist/index.js .
 
 CMD ["sh", "-c", "node index.js --project=\"${project}\" --release=\"${release}\" --jiraUser=\"${jiraUser}\" --jiraPass=\"${jiraPass}\" --format=\"${format}\""]
