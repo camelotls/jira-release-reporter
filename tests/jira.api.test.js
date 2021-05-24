@@ -34,10 +34,12 @@ describe('Jira API', () => {
         .reply(401, jiraMocker.responses.loginFailedWrongCredentials.data);
     });
     it('should be correctly construct the authentication header', () => {
-      const session = 'JSESSIONID=0123456789ABCDEF';
+      const jsessionId = 'JSESSIONID=0123456789ABCDEF';
+      const awslalb = 'AWSALB=0123456789ABVDEF';
+      const session = { jsessionId, awslalb };
       const result = getAuthHeader(session);
       expect(result).not.toBeNull();
-      expect(result).toHaveProperty('Cookie', session);
+      expect(result).toHaveProperty('Cookie', 'JSESSIONID=0123456789ABCDEF;AWSALB=0123456789ABVDEF');
     });
 
     it('should return a session identifier after sucessful login', async () => {
@@ -46,7 +48,7 @@ describe('Jira API', () => {
         jiraMocker.credentials.username,
         jiraMocker.credentials.password,
       );
-      expect(result).toMatch(
+      expect(result.jsessionId).toMatch(
         `${jiraMocker.responses.loginSuccessful.data.session.name}=${jiraMocker.responses.loginSuccessful.data.session.value}`,
       );
     });

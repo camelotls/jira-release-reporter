@@ -19,7 +19,8 @@ const login = async (axiosInstance, jiraUser, jiraPass) => {
     const response = await axiosInstance.post(Endpoints.AUTH, authBody, {
       headers: basicHeaders(),
     });
-    cookie = { jsessionId: `${response.data.session.name}=${response.data.session.value}`, awslalb: `${response.headers['set-cookie'][0].split(';')[0]}` };
+    const awsalb = response.headers['set-cookie'] && response.headers['set-cookie'][0].split(';')[0];
+    cookie = { jsessionId: `${response.data.session.name}=${response.data.session.value}`, awslalb: awsalb };
     console.debug('log-in to jira successful');
   } catch (error) {
     const errorMessage = constructVerboseErrorMessage(error);
