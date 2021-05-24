@@ -9,7 +9,8 @@ pipeline {
         string(name: 'Release', description: 'The Release Version as defined in JIRA for the Project')
         string(name: 'jrrVersion', description: 'The JIRA Release Reporter Docker Image version to execute')
         string(name: 'agentName', description: 'The agent to run the pipeline on', defaultValue: 'spark-compile')
-        credentials(name: 'jiraCredentialsId', description: 'The jira credentials id of the secret in the Jenkins vault')
+        string(name: 'jiraBaseURL', description: 'The base url where the JIRA REST API is accessible')
+        credentials(name: 'jiraCredentialsId', description: 'The jira credentials id of the secret in the Jenkins vault', defaultValue: 'https://jira.camelot.global/rest')
     }
     stages {
         stage('Execute Release Reporter') {

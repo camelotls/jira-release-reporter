@@ -1,14 +1,17 @@
-FROM node:15.11.0-alpine3.10
+FROM node:15
 
 ENV project=''
 ENV release=''
 ENV jiraUser=''
 ENV jiraPass=''
-ENV format = ''
+ENV jiraBaseURL=''
+ENV format=''
 
-WORKDIR /jrr/bin
+WORKDIR /jira-release-reporter/bin
 
-COPY ./jrrConfig.template.yaml ./jrrConfig.yaml
-COPY ./dist/index.js .
+COPY ./jrrConfig.template.yaml jrrConfig.yaml
+COPY ./dist/index.js index.js
+COPY ./jrr/renderers/html/template.html ./jrr/renderers/html/template.html
 
-CMD ["sh", "-c", "node index.js --project=\"${project}\" --release=\"${release}\" --jiraUser=\"${jiraUser}\" --jiraPass=\"${jiraPass}\" --format=\"${format}\""]
+
+CMD ["sh", "-c", "node index.js --project=\"${project}\" --release=\"${release}\" --jiraBaseURL=\"${jiraBaseURL}\" --jiraUser=\"${jiraUser}\" --jiraPass=\"${jiraPass}\" --format=\"${format}\""]

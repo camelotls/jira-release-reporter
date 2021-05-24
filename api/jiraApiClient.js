@@ -104,6 +104,7 @@ const filterByCriteriaAndKeys = async (
 
 const constructVerboseErrorMessage = (error) => {
   const errorMessage = error.message;
+  console.log(`${errorMessage} => ${error.response}`);
   return (
     `${errorMessage
     }: ${

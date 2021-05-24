@@ -33,8 +33,12 @@ const options = yargs.usage('Usage: -p <JIRA Project ID> -r <Release Name>').opt
 }).argv;
 
 const {
-  project, release, jiraUser, jiraPass, format,
+  project, release, jiraUser, jiraPass, jiraBaseURL, format,
 } = options;
+
+if (!jrrConfig.jira) {
+  jrrConfig.jira = {};
+}
 
 if (project) {
   jrrConfig.project = project;
@@ -43,10 +47,13 @@ if (release) {
   jrrConfig.releaseVersion = release;
 }
 if (jiraUser) {
-  jrrConfig.jiraUser = jiraUser;
+  jrrConfig.jira.jiraUser = jiraUser;
 }
 if (jiraPass) {
-  jrrConfig.jiraPass = jiraPass;
+  jrrConfig.jira.jiraPass = jiraPass;
+}
+if (jiraBaseURL) {
+  jrrConfig.jira.jiraBaseURL = jiraBaseURL;
 }
 if (format) {
   jrrConfig.format = format;
