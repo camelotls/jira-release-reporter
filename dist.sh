@@ -7,10 +7,16 @@ if [ ! -f "$CONF" ]; then
     exit 1
 fi
 
-npm install
-./node_modules/.bin/ncc build index.js -o dist
-
 DIST=./dist/index.js
+
+npm install
+
+if [ -f "$DIST" ]; then
+  rm $DIST
+fi
+
+ncc build index.js -o dist
+
 if [ ! -f "$DIST" ]; then
     echo "The dist file: $DIST does not exist"
     exit 1

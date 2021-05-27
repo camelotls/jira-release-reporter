@@ -4,6 +4,10 @@
 const _ = require('lodash');
 const table = require('console.table');
 const axios = require('../config/axios-config.js');
+const appConfig = require('../config/app-config');
+const renderFactory = require('./renderers/renderFactory');
+const fsWriter = require('./filesystem/fsWriter');
+
 let {
   login,
   logout,
@@ -16,13 +20,13 @@ const { reducer, takeKeys } = require('./jrrReducer');
 const jrrMain = async (jrrConfig) => {
   const axiosInstance = axios(jrrConfig.jira.jiraBaseURL).get();
 
-  const sessionId = await login(
+  const cookie = await login(
     axiosInstance,
     jrrConfig.jira.jiraUser,
     jrrConfig.jira.jiraPass,
   );
 
-  const authHeaders = getAuthHeader(sessionId);
+  const authHeaders = getAuthHeader(cookie);
 
   const result = await fetchIssueLinksFromStoriesByRelease(
     axiosInstance,
@@ -39,6 +43,12 @@ const jrrMain = async (jrrConfig) => {
   console.log(printResultsInTable(shrinkedData));
 
   logout(axiosInstance, authHeaders);
+
+  if (appConfig.EXPORTABLE_FORMATS.includes(jrrConfig.format)) {
+    const renderer = renderFactory(jrrConfig.format, shrinkedData);
+    const output = renderer.render(shrinkedData);
+    fsWriter(output.filename, output.content);
+  }
 
   // * uncomment for debug purposes
   // console.debug(JSON.stringify(filteredIssues, null, 2));
