@@ -42,6 +42,7 @@ pipeline {
       stage ('Apply Config'){
         steps {
           script {
+           sh "ls -la"
            writeFile(file: 'jrrConfig.yaml', text: params.configuration)
           }
         }
