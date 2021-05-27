@@ -1,3 +1,29 @@
+def defaultConfig = '''
+format: html
+issues:
+  - type: Test
+    status: Done
+    title: "Automated Tests"
+    criteria:
+      Test Type: Automated
+  - type: Test
+    title: "Total Tests"
+  - type: Test
+    title: "Automation Candidates"
+    criteria:
+      Automation Candidate: "Yes"
+      Test Type: Manual
+  - type: Test
+    title: "To Be Assessed"
+    criteria:
+      Automation Candidate: "TBA"
+  - type: Test
+    title: "Non Automation Candidates"
+    criteria:
+      Automation Candidate: "No"
+
+'''
+
 pipeline {
     agent {
         node {
@@ -10,6 +36,7 @@ pipeline {
         string(name: 'jrrVersion', description: 'The JIRA Release Reporter Docker Image version to execute')
         string(name: 'agentName', description: 'The agent to run the pipeline on', defaultValue: 'spark-compile')
         string(name: 'jiraBaseURL', description: 'The base url where the JIRA REST API is accessible')
+        text(name: 'configuration', description: 'Yaml configuration with the report criteria', defaultValue: defaultConfig)
         credentials(name: 'jiraCredentialsId', description: 'The jira credentials id of the secret in the Jenkins vault', defaultValue: 'https://jira.camelot.global/rest')
     }
     stages {
@@ -17,7 +44,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: params.jiraCredentialsId, passwordVariable: 'jiraPass', usernameVariable: 'jiraUser')]) {
                     sh "sudo systemctl is-active --quiet docker || sudo systemctl restart docker"
-                    sh "sudo docker run -e jiraBaseURL=\"${params.jiraBaseURL}\" -e project=\"${params.Project}\" -e release=\"${params.Release}\" -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v \"`pwd`\":/jira-release-reporter/bin/report docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
+                    sh "sudo docker run -e config=\"${params.configuration}\" -e jiraBaseURL=\"${params.jiraBaseURL}\" -e project=\"${params.Project}\" -e release=\"${params.Release}\" -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v \"`pwd`\":/jira-release-reporter/bin/report docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
                     sh "ls -la"
                     publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: "./", reportFiles: "out.html", reportName: "Jira Release Report for ${Release}"])
                 }
