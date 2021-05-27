@@ -21,7 +21,6 @@ issues:
     title: "Non Automation Candidates"
     criteria:
       Automation Candidate: "No"
-
 '''
 
 pipeline {
@@ -42,9 +41,12 @@ pipeline {
     stages {
         stage('Execute Release Reporter') {
             steps {
+              if (configuration) {
+                new File('jrrConfig.yaml').write(params.configuration)
+              }
                 withCredentials([usernamePassword(credentialsId: params.jiraCredentialsId, passwordVariable: 'jiraPass', usernameVariable: 'jiraUser')]) {
                     sh "sudo systemctl is-active --quiet docker || sudo systemctl restart docker"
-                    sh "sudo docker run -e config=\"|- ${params.configuration}\" -e jiraBaseURL=\"${params.jiraBaseURL}\" -e project=\"${params.Project}\" -e release=\"${params.Release}\" -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v \"`pwd`\":/jira-release-reporter/bin/report docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
+                    sh "sudo docker run -e jiraBaseURL=\"${params.jiraBaseURL}\" -e project=\"${params.Project}\" -e release=\"${params.Release}\" -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v \"`pwd`\":/jira-release-reporter/bin/report -v \"`pwd`/jrrConfig.yaml:/jira-release-reporter/bin/jrrConfig.yaml\" docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
                     sh "ls -la"
                     publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: "./", reportFiles: "out.html", reportName: "Jira Release Report for ${Release}"])
                 }

@@ -11,21 +11,19 @@ const options = yargs.usage('Usage: -p <JIRA Project ID> -r <Release Name> -conf
   alias: 'project', describe: 'The project ID as maintained in JIRA', type: 'string', demandOption: false,
 }).option('r', {
   alias: 'release', describe: 'The release version to retrieve information for', type: 'string', demandOption: false,
-}).option('conf', {
-  alias: 'alternative configuration', describe: 'An optional external configuration to override the internal one', type: 'string', demandOption: false,
 }).argv;
 
 const {
-  project, release, jiraUser, jiraPass, jiraBaseURL, format, conf,
+  project, release, jiraUser, jiraPass, jiraBaseURL, format,
 } = options;
 
-if (!conf && !existsSync(configFile)) {
+if (!existsSync(configFile)) {
   const errorMessage = `Config file ${configFile} not found at the expected location (./)`;
   console.error(errorMessage);
   throw errorMessage;
 }
 
-const config = conf || readFileSync(configFile, 'utf-8');
+const config = readFileSync(configFile, 'utf-8');
 if (!config) {
   const errorMessage = `Could not read config file ${configFile}`;
   console.error(errorMessage);
