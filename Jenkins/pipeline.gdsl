@@ -30,8 +30,8 @@ pipeline {
         }
     }
     parameters {
-        string(name: 'Project', description: 'The Project in JIRA to execute the reporting against')
-        string(name: 'Release', description: 'The Release Version as defined in JIRA for the Project')
+        string(name: 'Project', description: 'The Project in JIRA to execute the reporting against e.g. DIG or MBIL')
+        string(name: 'Release', description: 'The Release Version as defined in JIRA for the Project e.g. Release 61 for Spark or Mobile 7.12.0 for Mobile')
         string(name: 'jrrVersion', description: 'The JIRA Release Reporter Docker Image version to execute', defaultValue: 'latest')
         string(name: 'agentName', description: 'The agent to run the pipeline on', defaultValue: 'spark-compile')
         string(name: 'jiraBaseURL', description: 'The base url where the JIRA REST API is accessible', defaultValue: 'https://jira.camelot.global/rest')
@@ -46,15 +46,15 @@ pipeline {
           }
         }
       }
-        stage('Execute Release Reporter') {
-            steps {
-              withCredentials([usernamePassword(credentialsId: params.jiraCredentialsId, passwordVariable: 'jiraPass', usernameVariable: 'jiraUser')]) {
-                  sh "sudo systemctl is-active --quiet docker || sudo systemctl restart docker"
-                  sh "cat \"`pwd`\"/jrrConfig.yaml"
-                  sh "sudo docker run -e jiraBaseURL=\"${params.jiraBaseURL}\" -e project=\"${params.Project}\" -e release=\"${params.Release}\" -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v \"`pwd`\":/jira-release-reporter/bin/report -v \"`pwd`\"/jrrConfig.yaml:/jira-release-reporter/bin/jrrConfig.yaml docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
-                  publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: "./", reportFiles: "out.html", reportName: "Jira Release Report for ${Release}"])
-              }
+      stage('Execute Release Reporter') {
+          steps {
+            withCredentials([usernamePassword(credentialsId: params.jiraCredentialsId, passwordVariable: 'jiraPass', usernameVariable: 'jiraUser')]) {
+                sh "sudo systemctl is-active --quiet docker || sudo systemctl restart docker"
+                sh "cat \"`pwd`\"/jrrConfig.yaml"
+                sh "sudo docker run -e jiraBaseURL=\"${params.jiraBaseURL}\" -e project=\"${params.Project}\" -e release=\"${params.Release}\" -e jiraUser=${jiraUser} -e jiraPass=${jiraPass} -e format=html -v \"`pwd`\":/jira-release-reporter/bin/report -v \"`pwd`\"/jrrConfig.yaml:/jira-release-reporter/bin/jrrConfig.yaml docker.artifactory.camelot.global/jira-release-reporter:${jrrVersion}"
+                publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: "./", reportFiles: "out.html", reportName: "Jira Release Report for ${Release}"])
             }
-        }
+          }
+      }
     }
 }
