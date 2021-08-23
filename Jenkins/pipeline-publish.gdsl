@@ -11,6 +11,7 @@ pipeline {
         stage('push to artifactory') {
             steps {
                 script {
+                    sh "touch jrrConfig.yaml"
                     sh "sudo systemctl is-active --quiet docker || sudo systemctl restart docker"
                     sh "./dist.sh -t docker.artifactory.camelot.global/jira-release-reporter:${params.version} -p"
                 }
