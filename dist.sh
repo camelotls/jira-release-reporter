@@ -21,7 +21,7 @@ if [ ! -f "$DIST" ]; then
     exit 1
 fi
 
-TAG=docker.pkg.github.com/camelotls/jira-development/jira-release-reporter:latest
+TAG=ghcr.io/camelotls/jira-development/jira-release-reporter:latest
 push_to_registry=false
 
 while getopts "t:p" opt; do
