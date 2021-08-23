@@ -63,6 +63,7 @@ const fetchIssueLinksFromStoriesByRelease = async (
     jql: `project = ${project} AND issuetype = Story AND fixVersion = "${releaseVersion}"`,
     startAt: 0,
     fields: ['issuelinks'],
+    maxResults: 1000,
   };
   let result;
   try {
@@ -81,15 +82,17 @@ const filterByCriteriaAndKeys = async (
   jiraAuthHeaders,
   keys,
   criteria,
+  exclusionCriteria,
 ) => {
   const headers = {
     ...jiraAuthHeaders,
     ...basicHeaders(),
   };
   const query = {
-    jql: `${stringifyJqlCriteria(criteria)} AND key in (${keys.join(',')})`,
+    jql: `${stringifyJqlCriteria(criteria, exclusionCriteria)} AND key in (${keys.join(',')})`,
     startAt: 0,
     fields: ['key'],
+    maxResults: 1000,
   };
   let result;
   try {
@@ -113,11 +116,35 @@ const constructVerboseErrorMessage = (error) => {
   );
 };
 
-const stringifyJqlCriteria = (criteria) => {
+const stringifyJqlCriteria = (criteria, exclusionCriteria) => {
+  if (criteria && exclusionCriteria) {
+    return `${stringifyCriteria(criteria)} AND ${stringifyCriteria(exclusionCriteria, true)}`;
+  }
+  if (!criteria && exclusionCriteria) {
+    return stringifyCriteria(exclusionCriteria, true);
+  }
+  if (criteria && !exclusionCriteria) {
+    return stringifyCriteria(criteria);
+  }
+};
+
+const stringifyCriteria = (criteria, exclude = false) => {
   const tokenizedCriteria = [];
   // eslint-disable-next-line no-restricted-syntax
   for (const c of Object.entries(criteria)) {
-    tokenizedCriteria.push(`"${c[0]}" = "${c[1]}"`);
+    let clause;
+    if (c[1].constructor === Array) {
+      const operator = exclude ? 'NOT IN' : 'IN';
+      clause = `"${c[0]}" ${operator} (${c[1]})`;
+    } else if (_.toLower(c[1]) === 'null') {
+      clause = `"${c[0]}" is null`;
+    } else if (_.toLower(c[1]) === 'not null') {
+      clause = `"${c[0]}" is not null`;
+    } else {
+      const operator = exclude ? '!=' : '=';
+      clause = `"${c[0]}" ${operator} "${c[1]}"`;
+    }
+    tokenizedCriteria.push(clause);
   }
   let stringifiedCriteria = '';
   for (let index = 0; index < tokenizedCriteria.length; index += 1) {

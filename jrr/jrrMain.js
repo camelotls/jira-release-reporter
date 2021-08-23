@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 /* eslint-disable prefer-const */
@@ -39,7 +40,6 @@ const jrrMain = async (jrrConfig) => {
   const filteredIssues = await filterIssues(axiosInstance, issues, authHeaders);
   const shrinkedData = shrinkToCountPerTitle(filteredIssues);
 
-  console.debug(shrinkedData);
   console.log(printResultsInTable(shrinkedData));
 
   logout(axiosInstance, authHeaders);
@@ -58,19 +58,20 @@ const printResultsInTable = (shrinkedData) => table.getTable(shrinkedData);
 
 const filterIssues = async (axiosInstance, issuesToFilter, authHeaders) => {
   const issuesWithCriteria = [...issuesToFilter];
-  const issuesWithoutCriteria = _.remove(issuesWithCriteria, (i) => !i.criteria);
+  const issuesWithoutCriteria = _.remove(issuesWithCriteria, (i) => !i.criteria && !i.exclusionCriteria);
 
   const filteredIssues = await Promise.all(
     _.map(
       issuesWithCriteria,
       async ({
-        type, status, issues, criteria, title,
+        type, status, issues, criteria, exclusionCriteria, title,
       }) => {
         const filteredByCriteriaAndKeys = await filterByCriteriaAndKeys(
           axiosInstance,
           authHeaders,
           issues,
           criteria,
+          exclusionCriteria,
         );
         const issueKeys = takeKeys(filteredByCriteriaAndKeys.issues);
         return {
@@ -96,7 +97,7 @@ const shrinkToCountPerTitle = (theData) => _.map(theData, (theItem) => ({
 const takeIssues = (jrrConfigIssues, issuesFromJiraAPI) => (_.map(
   jrrConfigIssues,
   ({
-    type, status, criteria, title,
+    type, status, criteria, title, exclusionCriteria,
   }) => {
     const issues = reducer(issuesFromJiraAPI, type, status);
     return {
@@ -106,6 +107,7 @@ const takeIssues = (jrrConfigIssues, issuesFromJiraAPI) => (_.map(
       criteria,
       issues,
       issuesCount: issues.length,
+      exclusionCriteria,
     };
   },
 ));
