@@ -3,8 +3,7 @@
 CONF=./jrrConfig.yaml
 
 if [ ! -f "$CONF" ]; then
-    echo "The mandatory config file: $CONF does not exist"
-    exit 1
+  touch './jrrConfig.yaml'
 fi
 
 DIST=./dist/index.js
