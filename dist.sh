@@ -22,7 +22,7 @@ if [ ! -f "$DIST" ]; then
     exit 1
 fi
 
-TAG=docker.artifactory.camelot.global/jira-release-reporter:0.1.0
+TAG=docker.pkg.github.com/camelotls/jira-development/jira-release-reporter:latest
 push_to_registry=false
 
 while getopts "t:p" opt; do
