@@ -40,7 +40,14 @@ const jrrMain = async (jrrConfig) => {
   const filteredIssues = await filterIssues(axiosInstance, issues, authHeaders);
   const shrinkedData = shrinkToCountPerTitle(filteredIssues);
 
+  const totalTests = _.remove(filteredIssues, (item) => item.title === 'Total Tests')[0].issues;
+  const rest = _.union(..._.map(filteredIssues, (item) => item.issues));
+  const difference = _.difference(totalTests, rest);
   console.log(printResultsInTable(shrinkedData));
+  console.log(printResultsInTable(_.map(difference, (item) => ({ 'Not Categorized': item }))));
+
+  const missingOnes = _.map(difference, (item) => ({ key: item, url: `${_.trimEnd(jrrConfig.jira.jiraBaseURL, '/rest')}/browse/${item}` }));
+  shrinkedData.missing = missingOnes;
 
   logout(axiosInstance, authHeaders);
 

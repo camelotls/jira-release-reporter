@@ -121,3 +121,4 @@ jrrConfig.yaml
 
 # artefacts
 out.html
+report/**/*
