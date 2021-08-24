@@ -96,6 +96,9 @@ const filterByCriteriaAndKeys = async (
   };
   let result;
   try {
+    if (_.isEmpty(keys)) {
+      return [];
+    }
     const response = await searchWithQuery(axiosInstance, query, headers);
     result = response.data;
   } catch (error) {
