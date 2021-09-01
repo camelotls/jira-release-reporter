@@ -8,6 +8,7 @@ const axios = require('../config/axios-config.js');
 const appConfig = require('../config/app-config');
 const renderFactory = require('./renderers/renderFactory');
 const fsWriter = require('./filesystem/fsWriter');
+const { registerHandlebarsHelpers } = require('./renderers/handlebarsHelpers');
 
 let {
   login,
@@ -19,6 +20,8 @@ let {
 const { reducer, takeKeys } = require('./jrrReducer');
 
 const jrrMain = async (jrrConfig) => {
+  registerHandlebarsHelpers();
+
   const axiosInstance = axios(jrrConfig.jira.jiraBaseURL).get();
 
   const cookie = await login(
@@ -38,21 +41,21 @@ const jrrMain = async (jrrConfig) => {
 
   const issues = takeIssues(jrrConfig.issues, result.issues);
   const filteredIssues = await filterIssues(axiosInstance, issues, authHeaders);
-  const shrinkedData = shrinkToCountPerTitle(filteredIssues);
+  const shrinkedData = shrinkToCountPerTitleAndDetails(filteredIssues, jrrConfig.jira.jiraBaseURL);
 
   const totalTests = _.remove(filteredIssues, (item) => item.title === 'Total Tests')[0].issues;
   const rest = _.union(..._.map(filteredIssues, (item) => item.issues));
   const difference = _.difference(totalTests, rest);
-  console.log(printResultsInTable(shrinkedData));
+  console.log(printResultsInTable(shrinkedData.overview));
   console.log(printResultsInTable(_.map(difference, (item) => ({ 'Not Categorized': item }))));
 
-  const missingOnes = _.map(difference, (item) => ({ key: item, url: `${_.trimEnd(jrrConfig.jira.jiraBaseURL, '/rest')}/browse/${item}` }));
+  const missingOnes = createKeyLinkPairForIssues(difference, jrrConfig.jira.jiraBaseURL);
   shrinkedData.missing = missingOnes;
 
   logout(axiosInstance, authHeaders);
 
   if (appConfig.EXPORTABLE_FORMATS.includes(jrrConfig.format)) {
-    const renderer = renderFactory(jrrConfig.format, shrinkedData);
+    const renderer = renderFactory(jrrConfig.format);
     const output = renderer.render(shrinkedData);
     fsWriter(output.filename, output.content);
   }
@@ -95,10 +98,21 @@ const filterIssues = async (axiosInstance, issuesToFilter, authHeaders) => {
   return [...issuesWithoutCriteria, ...filteredIssues];
 };
 
-const shrinkToCountPerTitle = (theData) => _.map(theData, (theItem) => ({
-  Type: theItem.title,
-  Amount: theItem.issuesCount,
-}));
+const shrinkToCountPerTitleAndDetails = (theData, jiraBaseURL) => ({
+  overview: [
+    ..._.map(theData, (theItem) => ({
+      Type: theItem.title,
+      Amount: theItem.issuesCount,
+    })),
+  ],
+  details: [
+    ..._.map(theData, (theItem) => ({
+      Type: theItem.title,
+      Amount: theItem.issuesCount,
+      Issues: createKeyLinkPairForIssues(theItem.issues, jiraBaseURL),
+    })),
+  ],
+});
 
 // eslint-disable-next-line no-return-assign
 const takeIssues = (jrrConfigIssues, issuesFromJiraAPI) => (_.map(
@@ -118,5 +132,10 @@ const takeIssues = (jrrConfigIssues, issuesFromJiraAPI) => (_.map(
     };
   },
 ));
+
+const createKeyLinkPairForIssues = (issues, jiraBaseURL) => _.map(issues, (issue) => ({
+  key: issue,
+  url: `${_.trimEnd(jiraBaseURL, '/rest')}/browse/${issue}`,
+}));
 
 module.exports = jrrMain;

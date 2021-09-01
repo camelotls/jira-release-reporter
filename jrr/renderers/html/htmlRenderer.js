@@ -13,7 +13,7 @@ const renderHTML = (args) => {
   };
 };
 
-const HTMLRenderer = function (args) {
+const HTMLRenderer = function () {
   return {
     render: renderHTML,
   };
