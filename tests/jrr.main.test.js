@@ -7,7 +7,7 @@ const issuesFromJiraAPI = require('./mock/jiraDataResponses/jiraFetchStoriesByRe
 const jrrMain = rewire('../jrr/jrrMain');
 const takeIssues = jrrMain.__get__('takeIssues');
 const filterIssues = jrrMain.__get__('filterIssues');
-const shrinkToCountPerTitle = jrrMain.__get__('shrinkToCountPerTitle');
+const shrinkToCountPerTitleAndDetails = jrrMain.__get__('shrinkToCountPerTitleAndDetails');
 const printResultsInTable = jrrMain.__get__('printResultsInTable');
 const fetchAutomatedTests = require('./mock/jiraDataResponses/jiraFetchAutomatedTests');
 
@@ -108,9 +108,9 @@ describe('JIRA Release Reporter Main function', () => {
       expect(issues).toHaveLength(2);
 
       const filteredissues = await filterIssues(_, issues, {});
-      const shrinkedData = shrinkToCountPerTitle(filteredissues);
+      const shrinkedData = shrinkToCountPerTitleAndDetails(filteredissues, 'https://jira.mock.test');
       expect(shrinkedData).not.toBeNull();
-      expect(shrinkedData.length).toEqual(2);
+      expect(shrinkedData.overview.length).toEqual(2);
       _.each(shrinkedData, (j) => {
         expect(j).toHaveProperty('title', j.issuesCount);
         expect(j).not.toHaveProperty('type');
@@ -144,8 +144,8 @@ describe('JIRA Release Reporter Main function', () => {
       expect(issues).toHaveLength(2);
 
       const filteredissues = await filterIssues(_, issues, {});
-      const shrinkedData = shrinkToCountPerTitle(filteredissues);
-      const table = printResultsInTable(shrinkedData);
+      const shrinkedData = shrinkToCountPerTitleAndDetails(filteredissues, 'https://jira.mock.test');
+      const table = printResultsInTable(shrinkedData.overview);
       console.log(table);
 
       expect(consoleSpy).toHaveBeenCalledWith(
