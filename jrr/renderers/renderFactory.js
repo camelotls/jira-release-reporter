@@ -2,10 +2,10 @@ const HTMLRenderer = require('./html/htmlRenderer');
 
 const renderer = { html: HTMLRenderer };
 
-const createRenderer = (type, args) => {
+const createRenderer = (type) => {
   const RendererType = renderer[type];
 
-  return new RendererType(args);
+  return new RendererType();
 };
 
 module.exports = createRenderer;

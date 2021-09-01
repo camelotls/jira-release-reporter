@@ -13,14 +13,19 @@
             .results tr:nth-child(even) {
                 background-color: #f2f2f2;
             }
+            summary:hover {
+                background-color: #347936;;
+            }
             .results tr:hover {background-color: #ddd;}
-            .results th {
+            .results th, summary {
                 padding-top: 12px;
                 padding-bottom: 12px;
                 padding-left: 12px;
                 text-align: left;
                 background-color: #4CAF50;
                 color: white;
+                top: 0;
+                position: sticky
             }
         </style>
     </head>
@@ -30,23 +35,38 @@
                 <th>Type</th>
                 <th>Amount</th>
             </tr>
-            {{#each this}}
-                <tr>
-                    <td>{{this.Type}}</td>
-                    <td>{{this.Amount}}</td>
-                </tr>
+            {{#each this.overview}}
+            <tr>
+                <td>{{this.Type}}</td>
+                <td>{{this.Amount}}</td>
+            </tr>
             {{/each}}
         </table>
         <hr />
         <table class="results" id="missing">
             <tr>
-                <th>Not Categorized</th>
+                <th>Not Categorized ({{this.missing.length}})</th>
             </tr>
             {{#each this.missing}}
-                <tr>
-                    <td><a target="_blank" href={{this.url}}>{{this.key}}</a></td>
-                </tr>
+            <tr>
+                <td><a target="_blank" href={{this.url}}>{{this.key}}</a></td>
+            </tr>
             {{/each}}
         </table>
+        <hr />
+        {{#each this.details}}
+            {{#greaterThanZero this.Issues.length}}
+            <details class="results">
+                <summary>{{this.Type}} ({{this.Amount}})</summary>
+                <table class="results" id={{this.Type}}>
+                    {{#each this.Issues}}
+                    <tr>
+                        <td><a target="_blank" href={{this.url}}>{{this.key}}</a></td>
+                    </tr>
+                    {{/each}}
+                </table>
+            </details>
+            {{/greaterThanZero}}
+        {{/each}}
     </body>
 </html>
