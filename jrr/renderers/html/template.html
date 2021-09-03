@@ -1,4 +1,5 @@
 <html>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <head>
         <style>
             .results {
@@ -27,6 +28,12 @@
                 top: 0;
                 position: sticky
             }
+            .tag-text {
+                font-weight: bold;
+                font-size: smaller;
+                float: right;
+                margin-right: 10px;
+            }
         </style>
     </head>
     <body>
@@ -42,18 +49,23 @@
             </tr>
             {{/each}}
         </table>
-        <hr />
-        <table class="results" id="missing">
-            <tr>
-                <th>Not Categorized ({{this.missing.length}})</th>
-            </tr>
-            {{#each this.missing}}
-            <tr>
-                <td><a target="_blank" href={{this.url}}>{{this.key}}</a></td>
-            </tr>
-            {{/each}}
-        </table>
-        <hr />
+        {{#greaterThanZero this.missing.length}}
+            <details class="results">
+                <summary>Not Categorized ({{this.missing.length}}</summary>
+                <table class="results" id="missing">
+                    {{#each this.missing}}
+                    <tr>
+                        <td>
+                            <a target="_blank" href={{this.url}}>{{this.key}}</a>
+                            {{#each this.tags}}
+                                <span class="tag-text w3-tag w3-round w3-yellow w3-center">{{this}}</span>
+                            {{/each}}
+                        </td>
+                    </tr>
+                    {{/each}}
+                </table>
+            </details>
+        {{/greaterThanZero}}
         {{#each this.details}}
             {{#greaterThanZero this.Issues.length}}
             <details class="results">
