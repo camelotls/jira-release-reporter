@@ -77,6 +77,41 @@ const fetchIssueLinksFromStoriesByRelease = async (
   return result;
 };
 
+const getAllFields = async (axiosInstance,
+  jiraAuthHeaders) => {
+  const headers = {
+    ...jiraAuthHeaders,
+    ...basicHeaders(),
+  };
+  let result;
+  try {
+    const response = await axiosInstance.get(Endpoints.FIELD_META, { headers });
+    result = response.data;
+  } catch (error) {
+    const errorMessage = constructVerboseErrorMessage(error);
+    console.log(errorMessage);
+    throw errorMessage;
+  }
+  return result;
+};
+
+const getThisIssue = async (axiosInstance, jiraAuthHeaders, apiUrl) => {
+  const headers = {
+    ...jiraAuthHeaders,
+    ...basicHeaders(),
+  };
+  let result;
+  try {
+    const response = await axiosInstance.get(apiUrl, { headers });
+    result = response.data;
+  } catch (error) {
+    const errorMessage = constructVerboseErrorMessage(error);
+    console.error(errorMessage);
+    throw errorMessage;
+  }
+  return result;
+};
+
 const filterByCriteriaAndKeys = async (
   axiosInstance,
   jiraAuthHeaders,
@@ -170,4 +205,6 @@ module.exports = {
   getAuthHeader,
   fetchIssueLinksFromStoriesByRelease,
   filterByCriteriaAndKeys,
+  getAllFields,
+  getThisIssue,
 };

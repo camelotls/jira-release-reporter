@@ -4,6 +4,7 @@
 /* eslint-disable prefer-const */
 const _ = require('lodash');
 const table = require('console.table');
+const { getUniqueCriteria, handleMetaFields, getAllIssues } = require('./utils/util');
 const axios = require('../config/axios-config.js');
 const appConfig = require('../config/app-config');
 const renderFactory = require('./renderers/renderFactory');
@@ -49,10 +50,15 @@ const jrrMain = async (jrrConfig) => {
   console.log(printResultsInTable(shrinkedData.overview));
   console.log(printResultsInTable(_.map(difference, (item) => ({ 'Not Categorized': item }))));
 
-  const missingOnes = createKeyLinkPairForIssues(difference, jrrConfig.jira.jiraBaseURL);
-  shrinkedData.missing = missingOnes;
+  const notCategorized = createKeyLinkPairForIssues(difference, jrrConfig.jira.jiraBaseURL);
+  shrinkedData.missing = notCategorized;
 
-  logout(axiosInstance, authHeaders);
+  if (!_.isEmpty(notCategorized)) {
+    const criteria = getUniqueCriteria(jrrConfig.issues);
+    const metaFieldsPairs = await handleMetaFields(criteria, axiosInstance, authHeaders);
+    const enrichedNotCategorized = await getAllIssues(axiosInstance, authHeaders, notCategorized, metaFieldsPairs);
+    shrinkedData.missing = enrichedNotCategorized;
+  }
 
   if (appConfig.EXPORTABLE_FORMATS.includes(jrrConfig.format)) {
     const renderer = renderFactory(jrrConfig.format);
@@ -62,6 +68,7 @@ const jrrMain = async (jrrConfig) => {
 
   // * uncomment for debug purposes
   // console.debug(JSON.stringify(filteredIssues, null, 2));
+  logout(axiosInstance, authHeaders);
 };
 
 const printResultsInTable = (shrinkedData) => table.getTable(shrinkedData);
@@ -136,6 +143,7 @@ const takeIssues = (jrrConfigIssues, issuesFromJiraAPI) => (_.map(
 const createKeyLinkPairForIssues = (issues, jiraBaseURL) => _.map(issues, (issue) => ({
   key: issue,
   url: `${_.trimEnd(jiraBaseURL, '/rest')}/browse/${issue}`,
+  api: `${jiraBaseURL}/api/2/issue/${issue}`,
 }));
 
 module.exports = jrrMain;
