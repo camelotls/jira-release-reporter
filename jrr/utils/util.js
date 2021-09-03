@@ -18,11 +18,18 @@ const handleMetaFields = async (metaFieldsFromCriteria, axiosInstance, jiraAuthH
   return _.map(usedFieldsMeta, (meta) => ({ id: meta.id, field: meta.name }));
 };
 
+const resolveFieldValue = (field) => {
+  if (field.constructor === Array) {
+    return field[0].value;
+  }
+  return field.value;
+};
+
 const metaFieldIssueMatch = (metaFields, issueFields) => {
   const matches = [];
   for (const metaField of metaFields) {
     if (metaField.id in issueFields) {
-      matches.push(`${metaField.field} : ${issueFields[metaField.id] ? issueFields[metaField.id].value : 'null'}`);
+      matches.push(`${metaField.field} : ${issueFields[metaField.id] ? resolveFieldValue(issueFields[metaField.id]) : 'null'}`);
     }
   }
   return matches;
