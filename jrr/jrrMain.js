@@ -50,14 +50,14 @@ const jrrMain = async (jrrConfig) => {
   console.log(printResultsInTable(shrinkedData.overview));
   console.log(printResultsInTable(_.map(difference, (item) => ({ 'Not Categorized': item }))));
 
-  const missingOnes = createKeyLinkPairForIssues(difference, jrrConfig.jira.jiraBaseURL);
-  shrinkedData.missing = missingOnes;
+  const notCategorized = createKeyLinkPairForIssues(difference, jrrConfig.jira.jiraBaseURL);
+  shrinkedData.missing = notCategorized;
 
-  if (!_.isEmpty(missingOnes)) {
+  if (!_.isEmpty(notCategorized)) {
     const criteria = getUniqueCriteria(jrrConfig.issues);
     const metaFieldsPairs = await handleMetaFields(criteria, axiosInstance, authHeaders);
-    const enrichedMissingOnes = await getAllIssues(axiosInstance, authHeaders, missingOnes, metaFieldsPairs);
-    shrinkedData.missing = enrichedMissingOnes;
+    const enrichedNotCategorized = await getAllIssues(axiosInstance, authHeaders, notCategorized, metaFieldsPairs);
+    shrinkedData.missing = enrichedNotCategorized;
   }
 
   if (appConfig.EXPORTABLE_FORMATS.includes(jrrConfig.format)) {
